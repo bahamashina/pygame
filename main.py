@@ -24,7 +24,6 @@ menu_button=pygame.transform.scale(pygame.image.load('pictures/menu_button.png')
 menu_button_2=pygame.transform.scale(pygame.image.load('pictures/menu_button_2.png'),(80,80))
 options_titles=pygame.transform.scale(pygame.image.load('pictures/options_titles.png'),(300,300))
 example_buttons=pygame.transform.scale(pygame.image.load('pictures/example_buttons.png'),(50,250))
-# explosionSound=pygame.mixer.Sound('sounds/explosion.wav')
 
 
 
@@ -42,15 +41,15 @@ def draw_text(text,font1,color,surface,x,y):
 
 def buttons_animation():
 	global button_tick,button_anim
-	if button_tick ==50:
+	if button_tick == 50:
 		button_anim = False
 	elif button_tick == 0:
 		button_anim = True
 
 	if button_anim:
-		button_tick +=2
+		button_tick += 2
 	else:
-		button_tick -=2
+		button_tick -= 2
 
 
 class Player(pygame.sprite.Sprite):
@@ -67,10 +66,11 @@ class Player(pygame.sprite.Sprite):
 
 		self.images=[pygame.transform.scale(pygame.image.load('pictures/hero.png'),(75,75)),
             pygame.transform.scale(pygame.image.load('pictures/jump.png'),(75,75)),
-                    pygame.transform.scale(pygame.image.load('pictures/fall.png'),(75,75))]
-		self.image_anim=[]
+                    pygame.transform.scale(pygame.image.load('pictures/fall.png'),(75,75)),
+					# pygame.transform.scale(pygame.image.load('pictures/die.png'),(75,75))
+					]
+		self.image_anim = []
 		self.image = self.images[0]
-		# Установите ссылку на изображение прямоугольника
 		self.rect = self.image.get_rect()
 
 		# Задаем вектор скорости игрока
@@ -133,7 +133,7 @@ class Player(pygame.sprite.Sprite):
 			self.change_y = 1
 		else:
 			self.change_y += 0.95
-			if self.change_y >0:
+			if self.change_y > 0:
 				if(self.right): # Проверяем куда он смотрит и если что, то переворачиваем его
 					self.image=self.images[2]
 				else:
@@ -144,11 +144,7 @@ class Player(pygame.sprite.Sprite):
 			done=True
 			self.change_y = 0
 			self.rect.y = screenheight - self.rect.height
-			if(self.right): # Проверяем куда он смотрит и если что, то переворачиваем его
-				self.image=self.images[0]
-			else:
-				self.image=self.images[0]
-				self.flip()
+			# self.image = self.images[3]
 
 	def jump(self):
 		# Обработка прыжка
@@ -160,7 +156,7 @@ class Player(pygame.sprite.Sprite):
 		self.rect.y -= 10
 
 		# Если все в порядке, прыгаем вверх
-		if len(platform_hit_list) > 0 or self.rect.bottom >= screenheight:
+		if len(platform_hit_list) > 0:
 			self.change_y = -16
 			if(self.right): # Проверяем куда он смотрит и если что, то переворачиваем его
 				self.image=self.images[1]
@@ -225,10 +221,10 @@ class Chest(pygame.sprite.Sprite):
 		global current_level_no
 		self.rect = screen.blit(self.images[0],(x,y))
 
-		if self.open_chest >=40:
+		if self.open_chest >= 40:
 			self.cnt=1
 
-		col=self.rect.colliderect(player.rect)
+		col = self.rect.colliderect(player.rect)
 
 		if col:
 			if self.cnt == 0:
@@ -259,8 +255,8 @@ class Enemy(pygame.sprite.Sprite):
 		self.image = pygame.transform.scale(pygame.image.load('pictures/enemy.png'),(150,150))
 		# Установите ссылку на изображение прямоугольника
 		self.rect = self.image.get_rect()
-		self.timer=0
-		self.anim =True
+		self.timer = 0
+		self.anim = True
 
 
 	def draw(self,player,x,y):
@@ -269,7 +265,7 @@ class Enemy(pygame.sprite.Sprite):
 		self.speed=2
 
 		if self.timer == 200:
-			self.anim=False
+			self.anim = False
 		elif self.timer == 0:
 			self.anim = True
 
@@ -278,12 +274,13 @@ class Enemy(pygame.sprite.Sprite):
 		else:
 			self.timer -=self.speed
 		self.rect = screen.blit(self.image,(x+self.timer,y))
-		collision=self.rect.colliderect(player.rect)
+		collision = self.rect.colliderect(player.rect)
 
 		if collision:
 			done=True
 		else:
 			screen.blit(self.image,(x+self.timer,y))
+
 
 
 class Coin(pygame.sprite.Sprite):
@@ -312,21 +309,21 @@ class Coin(pygame.sprite.Sprite):
 	def draw(self,player,x,y):
 		global current_level_no,coin_count
 
-		if self.coin_anim >=51:
-			self.coin_anim =0
+		if self.coin_anim >= 51:
+			self.coin_anim = 0
 
 
 		if self.coin_cnt == 0:
 			self.rect = screen.blit(self.images[0],(x,y))
 
-			self.col=self.rect.colliderect(player.rect)
+			self.col = self.rect.colliderect(player.rect)
 
-			if self.col==0:
+			if self.col == 0:
 				screen.blit(self.images[self.coin_anim//3],(x,y))
-				self.coin_anim+=1
+				self.coin_anim += 1
 			else:
-			 	coin_count +=1
-			 	self.coin_cnt=1
+			 	coin_count += 1
+			 	self.coin_cnt = 1
 
 
 # Класс для расстановки платформ на сцене
@@ -336,18 +333,18 @@ class Level(object):
 		self.platform_list = pygame.sprite.Group()
 		# Ссылка на основного игрока
 		self.player = player
-		self.chest=Chest()
-		self.level=level
-		self.chests=[[700,225],[770,180],[650,260]]
-		self.coins=[]
-		self.enemy=Enemy()
+		self.chest = Chest()
+		self.level = level
+		self.chests = [[700,225],[770,180],[650,260]]
+		self.coins = []
+		self.enemy = Enemy()
 
 
 		self.enemies_pos=[[],[],[300,50]]
 
 		self.coins_pos = [[[175,450],[330,350],[575,250]],
                       [[125,330],[475,300],[600,200]],
-                      [[270,150],[330,350],[575,250]]]
+                      [[290,150],[330,350],[575,250]]]
 
 		self.coin_cnt =-1
 
@@ -453,7 +450,7 @@ def game_over(win):
 	game_over=True
 	while game_over:
 		screen.blit(pygame.transform.scale(pygame.image.load('pictures/title2.png'),(500,300)),(200,150))
-		if win :draw_text("               You Win",font3,(255,255,0),screen,250,225)
+		if win :draw_text("               You Won",font3,(255,255,0),screen,250,225)
 		else:draw_text("              You Lost",font3,(255,255,0),screen,250,225)
 		draw_text("You Score is : {} out of 9".format(coin_count),font3,(255,255,0),screen,250,250)
 		draw_text("Press ESC Button to return",font3,(255,255,0),screen,250,290)
@@ -491,9 +488,6 @@ def game():
 		player = Player()
 		win=False
 
-		# Создаем все уровни
-
-		# Устанавливаем текущий уровень
 		hero_pos = [[100,screenheight - 200],[50,200],[150,300]]
 
 		# Цикл будет до тех пор, пока пользователь не нажмет кнопку закрытия
@@ -503,9 +497,6 @@ def game():
 		clock = pygame.time.Clock()
 		level_list = [Level_01(player),Level_02(player),Level_03(player)]
 		hero_cnt = 0
-		# move=  [[[],[],[]],
-		# 		[[],[],[],[]],
-		# 		[[],[],[]]]
 		tick=0
 		anim=True
 
@@ -522,7 +513,7 @@ def game():
 			active_sprite_list.add(player)
 			# Отслеживание действий
 			for event in pygame.event.get():
-				if event.type == pygame.QUIT: # Если закрыл программу, то останавливаем цикл
+				if event.type == pygame.QUIT:
 					done = True
 
 				# Если нажали на стрелки клавиатуры, то двигаем объект
@@ -590,31 +581,31 @@ def options():
 	option=True
 
 	while option:
-		menu_button_rect = screen.blit(menu_button,(100,350+button_tick))
+		menu_button_rect = screen.blit(menu_button,(140,330+button_tick))
 		screen.blit(bg,(0,0))
-		screen.blit(options_titles,(250,200))
-		screen.blit(example_buttons,(600,220))
+		screen.blit(options_titles,(300,180))
+		screen.blit(example_buttons,(640,200))
 
-		draw_text("""                  Instructions""",font2,(255,255,255),screen,270,220)
-		draw_text("""  Your main goal is to collect coins""",font2,(255,255,255),screen,270,290)
-		draw_text("""  and reach the chest""",font2,(255,255,255),screen,270,310)
-		draw_text("""  Don't fall to the ground """,font2,(255,255,255),screen,270,360)
-		draw_text("""  Use controll buttons (as shown)""",font2,(255,255,255),screen,270,380)
-		draw_text("""  to move your Hero""",font2,(255,255,255),screen,270,400)
-		draw_text("""               The Game Made by """,font2,(255,255,255),screen,270,445)
-		draw_text("""                     19BDTEAM""",font2,(255,255,255),screen,270,465)
+		draw_text("""                  Instructions""",font2,(255,255,255),screen,320,200)
+		draw_text("""  Your main goal is to collect coins""",font2,(255,255,255),screen,320,270)
+		draw_text("""  and reach the chest""",font2,(255,255,255),screen,320,290)
+		draw_text("""  Don't fall to the ground """,font2,(255,255,255),screen,320,340)
+		draw_text("""  Use controll buttons (as shown)""",font2,(255,255,255),screen,320,360)
+		draw_text("""  to move your Hero""",font2,(255,255,255),screen,320,380)
+		draw_text("""               The Game Made by """,font2,(255,255,255),screen,320,425)
+		draw_text("""                     19BDTEAM""",font2,(255,255,255),screen,320,445)
 
 		buttons_animation()
 		mx,my = pygame.mouse.get_pos()
 
 		if menu_button_rect.collidepoint(mx,my):
-			screen.blit(menu_button_2,(98,348+button_tick))
+			screen.blit(menu_button_2,(138,328+button_tick))
 			if click:
 				pygame.mixer.music.load('music/click.mp3')
 				pygame.mixer.music.load('music/menu_music.mp3')
 				pygame.mixer.music.play(1)
 				option =False
-		else:screen.blit(menu_button,(100,350+button_tick))
+		else:screen.blit(menu_button,(140,330+button_tick))
 
 		click=False
 
